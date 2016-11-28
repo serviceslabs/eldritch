@@ -22,7 +22,11 @@ module Eldritch
     #   end
     #   task.start  # calls the block in parallel
     def start
-      @thread = Thread.new &@block
+      request_store = Thread.current[:request_store]
+      @thread = Thread.new {
+        Thread.current[:request_store] = request_store if request_store
+        @block.call
+      }
       @thread.eldritch_task = self
     end
 
